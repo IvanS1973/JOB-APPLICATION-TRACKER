@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, empty %}
+{% block title %}Contacts{% endblock %}
+{% block heading %}Contacts{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('contacts.create') }}">+ Add Contact</a>{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name or company" aria-label="Search contacts">
+  <button class="btn" type="submit">Search</button>
+  {% if q %}<a class="btn btn-ghost" href="{{ url_for('contacts.list_contacts') }}">Clear</a>{% endif %}
+</form>
+{% if contacts %}
+<div class="card table-wrap"><table>
+  <thead><tr><th>Name</th><th>Company</th><th>Title</th><th>Email</th><th>Phone</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  {% for c in contacts %}
+  <tr>
+    <td data-label="Name"><a href="{{ url_for('contacts.detail', contact_id=c.contact_id) }}"><strong>{{ c.contact_name }}</strong></a></td>
+    <td data-label="Company">{{ c.company.company_name if c.company else '—' }}</td>
+    <td data-label="Title">{{ c.title or '—' }}</td>
+    <td data-label="Email">{% if c.email %}<a href="mailto:{{ c.email }}">{{ c.email }}</a>{% else %}—{% endif %}</td>
+    <td data-label="Phone">{{ c.phone or '—' }}</td>
+    <td class="actions">
+      <a class="btn btn-sm" href="{{ url_for('contacts.detail', contact_id=c.contact_id) }}">View</a>
+      <a class="btn btn-sm" href="{{ url_for('contacts.edit', contact_id=c.contact_id) }}">Edit</a>
+      {{ delete_button(url_for('contacts.delete', contact_id=c.contact_id), c.contact_name) }}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% elif q %}{{ empty('No contacts match "' ~ q ~ '".') }}
+{% else %}{{ empty('No contacts yet.', url_for('contacts.create'), '+ Add Contact') }}{% endif %}
+{% endblock %}

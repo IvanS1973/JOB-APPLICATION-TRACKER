@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% macro val(name, current) -%}{{ form.get(name, '') if form else (current if current is not none else '') }}{%- endmacro %}
+{% set editing = company.company_id is not none %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} Company{% endblock %}
+{% block heading %}{{ 'Edit Company' if editing else 'Add Company' }}{% endblock %}
+{% block content %}
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field full"><label for="company_name">Company name *</label>
+    <input id="company_name" name="company_name" maxlength="100" required value="{{ val('company_name', company.company_name) }}"></div>
+  <div class="field"><label for="industry">Industry</label>
+    <input id="industry" name="industry" maxlength="50" value="{{ val('industry', company.industry) }}"></div>
+  <div class="field"><label for="website">Website</label>
+    <input id="website" name="website" type="url" maxlength="200" placeholder="https://" value="{{ val('website', company.website) }}"></div>
+  <div class="field"><label for="city">City</label>
+    <input id="city" name="city" maxlength="50" value="{{ val('city', company.city) }}"></div>
+  <div class="field"><label for="state">State</label>
+    <input id="state" name="state" maxlength="50" value="{{ val('state', company.state) }}"></div>
+  <div class="field full"><label for="notes">Notes</label>
+    <textarea id="notes" name="notes" rows="4">{{ val('notes', company.notes) }}</textarea></div>
+  <div class="form-actions full">
+    <a class="btn btn-ghost" href="{{ url_for('companies.detail', company_id=company.company_id) if editing else url_for('companies.list_companies') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save Company</button>
+  </div>
+</form>
+{% endblock %}

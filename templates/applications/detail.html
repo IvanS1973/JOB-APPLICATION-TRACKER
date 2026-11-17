@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, badge %}
+{% set iv = application.interview_data or {} %}
+{% block title %}Application #{{ application.application_id }}{% endblock %}
+{% block heading %}{{ application.job.job_title if application.job else 'Application' }}{% endblock %}
+{% block actions %}
+  <a class="btn" href="{{ url_for('applications.edit', application_id=application.application_id) }}">Edit</a>
+  {{ delete_button(url_for('applications.delete', application_id=application.application_id), 'this application') }}
+{% endblock %}
+{% block content %}
+<section class="card">
+  <dl class="details">
+    <dt>Job</dt><dd>{% if application.job %}<a href="{{ url_for('jobs.detail', job_id=application.job_id) }}">{{ application.job.job_title }}</a>{% else %}—{% endif %}</dd>
+    <dt>Company</dt><dd>{% if application.job and application.job.company %}<a href="{{ url_for('companies.detail', company_id=application.job.company_id) }}">{{ application.job.company.company_name }}</a>{% else %}—{% endif %}</dd>
+    <dt>Applied on</dt><dd>{{ application.application_date }}</dd>
+    <dt>Status</dt><dd>{{ badge(application.status) }}</dd>
+    <dt>Resume version</dt><dd>{{ application.resume_version or '—' }}</dd>
+    <dt>Cover letter</dt><dd>{{ 'Sent' if application.cover_letter_sent else 'Not sent' }}</dd>
+  </dl>
+</section>
+<section class="card">
+  <h2>Interview</h2>
+  {% if iv %}
+  <dl class="details">
+    <dt>Date</dt><dd>{{ iv.get('date') or '—' }}</dd>
+    <dt>Time</dt><dd>{{ iv.get('time') or '—' }}</dd>
+    <dt>Type</dt><dd>{{ iv.get('type') or '—' }}</dd>
+    <dt>Interviewer</dt><dd>{{ iv.get('interviewer') or '—' }}</dd>
+    <dt>Notes</dt><dd class="pre">{{ iv.get('notes') or '—' }}</dd>
+  </dl>
+  {% else %}<p class="muted">No interview information yet.</p>{% endif %}
+</section>
+{% endblock %}

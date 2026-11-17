@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% macro val(name, current) -%}{{ form.get(name, '') if form else (current if current is not none else '') }}{%- endmacro %}
+{% set editing = job.job_id is not none %}
+{% set sel_company = (form.get('company_id')|int(0)) if form else job.company_id %}
+{% set sel_type = form.get('job_type') if form else job.job_type %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} Job{% endblock %}
+{% block heading %}{{ 'Edit Job' if editing else 'Add Job' }}{% endblock %}
+{% block content %}
+{% if not companies %}
+<div class="card empty"><p>You need at least one company before adding a job.</p><a class="btn btn-primary" href="{{ url_for('companies.create') }}">+ Add Company</a></div>
+{% else %}
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field full"><label for="job_title">Job title *</label>
+    <input id="job_title" name="job_title" maxlength="100" required value="{{ val('job_title', job.job_title) }}"></div>
+  <div class="field"><label for="company_id">Company *</label>
+    <select id="company_id" name="company_id" required>
+      <option value="">Choose a company…</option>
+      {% for c in companies %}<option value="{{ c.company_id }}" {{ 'selected' if sel_company == c.company_id }}>{{ c.company_name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="job_type">Job type</label>
+    <select id="job_type" name="job_type">
+      <option value="">Not specified</option>
+      {% for t in job_types %}<option {{ 'selected' if sel_type == t }}>{{ t }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="salary_min">Minimum salary ($)</label>
+    <input id="salary_min" name="salary_min" type="number" min="0" step="1" value="{{ val('salary_min', job.salary_min) }}"></div>
+  <div class="field"><label for="salary_max">Maximum salary ($)</label>
+    <input id="salary_max" name="salary_max" type="number" min="0" step="1" value="{{ val('salary_max', job.salary_max) }}"></div>
+  <div class="field"><label for="job_url">Job posting URL</label>
+    <input id="job_url" name="job_url" type="url" maxlength="300" placeholder="https://" value="{{ val('job_url', job.job_url) }}"></div>
+  <div class="field"><label for="date_posted">Date posted</label>
+    <input id="date_posted" name="date_posted" type="date" value="{{ val('date_posted', job.date_posted) }}"></div>
+  <div class="field full"><label for="requirements">Required skills <span class="muted">(separate with commas)</span></label>
+    <input id="requirements" name="requirements" placeholder="Python, SQL, Flask, JavaScript" value="{{ val('requirements', (job.requirements or [])|join(', ')) }}">
+    <small class="muted">Saved in MySQL as a JSON array, e.g. ["Python", "SQL"].</small></div>
+  <div class="form-actions full">
+    <a class="btn btn-ghost" href="{{ url_for('jobs.detail', job_id=job.job_id) if editing else url_for('jobs.list_jobs') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save Job</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, money, badge %}
+{% block title %}{{ job.job_title }}{% endblock %}
+{% block heading %}{{ job.job_title }}{% endblock %}
+{% block actions %}
+  <a class="btn" href="{{ url_for('jobs.edit', job_id=job.job_id) }}">Edit</a>
+  {{ delete_button(url_for('jobs.delete', job_id=job.job_id), job.job_title) }}
+{% endblock %}
+{% block content %}
+<section class="card">
+  <dl class="details">
+    <dt>Company</dt><dd>{% if job.company %}<a href="{{ url_for('companies.detail', company_id=job.company_id) }}">{{ job.company.company_name }}</a>{% else %}—{% endif %}</dd>
+    <dt>Job type</dt><dd>{{ job.job_type or '—' }}</dd>
+    <dt>Salary range</dt><dd>{{ money(job.salary_min) }} – {{ money(job.salary_max) }}</dd>
+    <dt>Date posted</dt><dd>{{ job.date_posted or '—' }}</dd>
+    <dt>Posting</dt><dd>{% if job.job_url %}<a href="{{ job.job_url }}" target="_blank" rel="noopener">Open job posting</a>{% else %}—{% endif %}</dd>
+    <dt>Required skills</dt><dd>{% for s in job.requirements or [] %}<span class="chip">{{ s }}</span>{% else %}<span class="muted">None listed</span>{% endfor %}</dd>
+  </dl>
+</section>
+<section class="card">
+  <div class="card-head"><h2>Applications ({{ job.applications|length }})</h2><a class="btn btn-sm" href="{{ url_for('applications.create', job_id=job.job_id) }}">+ Apply</a></div>
+  {% if job.applications %}<ul class="list">
+    {% for a in job.applications %}<li><a href="{{ url_for('applications.detail', application_id=a.application_id) }}"><strong>{{ a.application_date }}</strong> {{ badge(a.status) }}</a></li>{% endfor %}
+  </ul>{% else %}<p class="muted">You have not applied to this job yet.</p>{% endif %}
+</section>
+{% endblock %}

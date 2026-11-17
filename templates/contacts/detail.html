@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button %}
+{% block title %}{{ contact.contact_name }}{% endblock %}
+{% block heading %}{{ contact.contact_name }}{% endblock %}
+{% block actions %}
+  <a class="btn" href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}">Edit</a>
+  {{ delete_button(url_for('contacts.delete', contact_id=contact.contact_id), contact.contact_name) }}
+{% endblock %}
+{% block content %}
+<section class="card">
+  <dl class="details">
+    <dt>Company</dt><dd>{% if contact.company %}<a href="{{ url_for('companies.detail', company_id=contact.company_id) }}">{{ contact.company.company_name }}</a>{% else %}—{% endif %}</dd>
+    <dt>Title</dt><dd>{{ contact.title or '—' }}</dd>
+    <dt>Email</dt><dd>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</dd>
+    <dt>Phone</dt><dd>{{ contact.phone or '—' }}</dd>
+    <dt>LinkedIn</dt><dd>{% if contact.linkedin_url %}<a href="{{ contact.linkedin_url }}" target="_blank" rel="noopener">View profile</a>{% else %}—{% endif %}</dd>
+    <dt>Notes</dt><dd class="pre">{{ contact.notes or '—' }}</dd>
+  </dl>
+</section>
+{% endblock %}

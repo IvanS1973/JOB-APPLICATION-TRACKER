@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set iv = application.interview_data or {} %}
+{% macro val(name, current) -%}{{ form.get(name, '') if form else (current if current is not none else '') }}{%- endmacro %}
+{% set editing = application.application_id is not none %}
+{% set sel_job = (form.get('job_id')|int(0)) if form else application.job_id %}
+{% set sel_status = form.get('status') if form else application.status %}
+{% set sel_itype = form.get('interview_type') if form else iv.get('type') %}
+{% set cover = (form.get('cover_letter_sent') == 'on') if form else application.cover_letter_sent %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} Application{% endblock %}
+{% block heading %}{{ 'Edit Application' if editing else 'Add Application' }}{% endblock %}
+{% block content %}
+{% if not jobs %}
+<div class="card empty"><p>You need at least one job before adding an application.</p><a class="btn btn-primary" href="{{ url_for('jobs.create') }}">+ Add Job</a></div>
+{% else %}
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field full"><label for="job_id">Job *</label>
+    <select id="job_id" name="job_id" required>
+      <option value="">Choose a job…</option>
+      {% for j in jobs %}<option value="{{ j.job_id }}" {{ 'selected' if sel_job == j.job_id }}>{{ j.job_title }} — {{ j.company.company_name if j.company else 'No company' }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="application_date">Application date *</label>
+    <input id="application_date" name="application_date" type="date" required value="{{ val('application_date', application.application_date) }}"></div>
+  <div class="field"><label for="status">Status</label>
+    <select id="status" name="status">{% for s in statuses %}<option {{ 'selected' if sel_status == s }}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="resume_version">Resume version</label>
+    <input id="resume_version" name="resume_version" maxlength="50" placeholder="e.g. v2-backend" value="{{ val('resume_version', application.resume_version) }}"></div>
+  <div class="field checkbox"><label><input type="checkbox" name="cover_letter_sent" {{ 'checked' if cover }}> Cover letter sent</label></div>
+
+  <fieldset class="full">
+    <legend>Interview details <span class="muted">(optional — saved as JSON)</span></legend>
+    <div class="form">
+      <div class="field"><label for="interview_date">Date</label>
+        <input id="interview_date" name="interview_date" type="date" value="{{ val('interview_date', iv.get('date')) }}"></div>
+      <div class="field"><label for="interview_time">Time</label>
+        <input id="interview_time" name="interview_time" type="time" value="{{ val('interview_time', iv.get('time')) }}"></div>
+      <div class="field"><label for="interview_type">Type</label>
+        <select id="interview_type" name="interview_type"><option value="">—</option>
+          {% for t in interview_types %}<option {{ 'selected' if sel_itype == t }}>{{ t }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="interviewer">Interviewer</label>
+        <input id="interviewer" name="interviewer" maxlength="100" value="{{ val('interviewer', iv.get('interviewer')) }}"></div>
+      <div class="field full"><label for="interview_notes">Notes</label>
+        <textarea id="interview_notes" name="interview_notes" rows="3">{{ val('interview_notes', iv.get('notes')) }}</textarea></div>
+    </div>
+  </fieldset>
+  <div class="form-actions full">
+    <a class="btn btn-ghost" href="{{ url_for('applications.detail', application_id=application.application_id) if editing else url_for('applications.list_applications') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save Application</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

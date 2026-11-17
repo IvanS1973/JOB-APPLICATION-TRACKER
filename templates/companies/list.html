@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, empty %}
+{% block title %}Companies{% endblock %}
+{% block heading %}Companies{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('companies.create') }}">+ Add Company</a>{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by company name" aria-label="Search companies">
+  <button class="btn" type="submit">Search</button>
+  {% if q %}<a class="btn btn-ghost" href="{{ url_for('companies.list_companies') }}">Clear</a>{% endif %}
+</form>
+{% if companies %}
+<div class="card table-wrap"><table>
+  <thead><tr><th>Name</th><th>Industry</th><th>Location</th><th>Jobs</th><th>Contacts</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  {% for c in companies %}
+  <tr>
+    <td data-label="Name"><a href="{{ url_for('companies.detail', company_id=c.company_id) }}"><strong>{{ c.company_name }}</strong></a></td>
+    <td data-label="Industry">{{ c.industry or '—' }}</td>
+    <td data-label="Location">{{ [c.city, c.state]|select|join(', ') or '—' }}</td>
+    <td data-label="Jobs">{{ c.jobs|length }}</td>
+    <td data-label="Contacts">{{ c.contacts|length }}</td>
+    <td class="actions">
+      <a class="btn btn-sm" href="{{ url_for('companies.detail', company_id=c.company_id) }}">View</a>
+      <a class="btn btn-sm" href="{{ url_for('companies.edit', company_id=c.company_id) }}">Edit</a>
+      {{ delete_button(url_for('companies.delete', company_id=c.company_id), c.company_name) }}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% elif q %}{{ empty('No companies match "' ~ q ~ '".') }}
+{% else %}{{ empty('No companies yet. Add the first company you are interested in.', url_for('companies.create'), '+ Add Company') }}{% endif %}
+{% endblock %}

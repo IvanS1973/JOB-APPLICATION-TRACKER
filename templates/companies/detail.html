@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, money %}
+{% block title %}{{ company.company_name }}{% endblock %}
+{% block heading %}{{ company.company_name }}{% endblock %}
+{% block actions %}
+  <a class="btn" href="{{ url_for('companies.edit', company_id=company.company_id) }}">Edit</a>
+  {{ delete_button(url_for('companies.delete', company_id=company.company_id), company.company_name) }}
+{% endblock %}
+{% block content %}
+<section class="card">
+  <dl class="details">
+    <dt>Industry</dt><dd>{{ company.industry or '—' }}</dd>
+    <dt>Website</dt><dd>{% if company.website %}<a href="{{ company.website }}" target="_blank" rel="noopener">{{ company.website }}</a>{% else %}—{% endif %}</dd>
+    <dt>Location</dt><dd>{{ [company.city, company.state]|select|join(', ') or '—' }}</dd>
+    <dt>Notes</dt><dd class="pre">{{ company.notes or '—' }}</dd>
+  </dl>
+</section>
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head"><h2>Jobs ({{ company.jobs|length }})</h2><a class="btn btn-sm" href="{{ url_for('jobs.create', company_id=company.company_id) }}">+ Add Job</a></div>
+    {% if company.jobs %}<ul class="list">
+      {% for j in company.jobs %}<li><a href="{{ url_for('jobs.detail', job_id=j.job_id) }}"><strong>{{ j.job_title }}</strong><span class="muted">{{ j.job_type or '' }} · {{ money(j.salary_min) }} – {{ money(j.salary_max) }}</span></a></li>{% endfor %}
+    </ul>{% else %}<p class="muted">No jobs for this company yet.</p>{% endif %}
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Contacts ({{ company.contacts|length }})</h2><a class="btn btn-sm" href="{{ url_for('contacts.create', company_id=company.company_id) }}">+ Add Contact</a></div>
+    {% if company.contacts %}<ul class="list">
+      {% for c in company.contacts %}<li><a href="{{ url_for('contacts.detail', contact_id=c.contact_id) }}"><strong>{{ c.contact_name }}</strong><span class="muted">{{ c.title or '' }} {{ c.email or '' }}</span></a></li>{% endfor %}
+    </ul>{% else %}<p class="muted">No contacts for this company yet.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

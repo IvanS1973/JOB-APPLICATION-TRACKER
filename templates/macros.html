@@ -1,0 +1,16 @@
+{% macro badge(status) -%}
+  <span class="badge badge-{{ (status or 'none')|lower }}">{{ status or '—' }}</span>
+{%- endmacro %}
+
+{% macro delete_button(action, label) -%}
+  <form method="post" action="{{ action }}" class="inline" data-confirm="Delete {{ label }}? This cannot be undone.">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+  </form>
+{%- endmacro %}
+
+{% macro money(v) -%}{{ '${:,}'.format(v) if v is not none else '—' }}{%- endmacro %}
+
+{% macro empty(message, link=None, link_text=None) -%}
+  <div class="empty"><p>{{ message }}</p>{% if link %}<a class="btn btn-primary" href="{{ link }}">{{ link_text }}</a>{% endif %}</div>
+{%- endmacro %}

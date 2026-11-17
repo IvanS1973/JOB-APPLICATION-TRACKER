@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, money, empty %}
+{% block title %}Jobs{% endblock %}
+{% block heading %}Jobs{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('jobs.create') }}">+ Add Job</a>{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <select name="company_id" aria-label="Filter by company">
+    <option value="">All companies</option>
+    {% for c in companies %}<option value="{{ c.company_id }}" {{ 'selected' if company_id == c.company_id }}>{{ c.company_name }}</option>{% endfor %}
+  </select>
+  <select name="job_type" aria-label="Filter by job type">
+    <option value="">All types</option>
+    {% for t in job_types %}<option {{ 'selected' if job_type == t }}>{{ t }}</option>{% endfor %}
+  </select>
+  <button class="btn" type="submit">Filter</button>
+  {% if company_id or job_type %}<a class="btn btn-ghost" href="{{ url_for('jobs.list_jobs') }}">Clear</a>{% endif %}
+</form>
+{% if jobs %}
+<div class="card table-wrap"><table>
+  <thead><tr><th>Title</th><th>Company</th><th>Type</th><th>Salary</th><th>Posted</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  {% for j in jobs %}
+  <tr>
+    <td data-label="Title"><a href="{{ url_for('jobs.detail', job_id=j.job_id) }}"><strong>{{ j.job_title }}</strong></a></td>
+    <td data-label="Company">{{ j.company.company_name if j.company else '—' }}</td>
+    <td data-label="Type">{{ j.job_type or '—' }}</td>
+    <td data-label="Salary">{{ money(j.salary_min) }} – {{ money(j.salary_max) }}</td>
+    <td data-label="Posted">{{ j.date_posted or '—' }}</td>
+    <td class="actions">
+      <a class="btn btn-sm" href="{{ url_for('jobs.detail', job_id=j.job_id) }}">View</a>
+      <a class="btn btn-sm" href="{{ url_for('jobs.edit', job_id=j.job_id) }}">Edit</a>
+      {{ delete_button(url_for('jobs.delete', job_id=j.job_id), j.job_title) }}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% elif company_id or job_type %}{{ empty('No jobs match these filters.') }}
+{% elif not companies %}{{ empty('Add a company first, then you can add jobs for it.', url_for('companies.create'), '+ Add Company') }}
+{% else %}{{ empty('No jobs yet.', url_for('jobs.create'), '+ Add Job') }}{% endif %}
+{% endblock %}

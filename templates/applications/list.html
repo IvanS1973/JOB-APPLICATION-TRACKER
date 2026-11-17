@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "macros.html" import delete_button, badge, empty %}
+{% block title %}Applications{% endblock %}
+{% block heading %}Applications{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('applications.create') }}">+ Add Application</a>{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <select name="status" aria-label="Filter by status">
+    <option value="">All statuses</option>
+    {% for s in statuses %}<option {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}
+  </select>
+  <select name="sort" aria-label="Sort by date">
+    <option value="desc" {{ 'selected' if sort != 'asc' }}>Newest first</option>
+    <option value="asc" {{ 'selected' if sort == 'asc' }}>Oldest first</option>
+  </select>
+  <button class="btn" type="submit">Apply</button>
+  {% if status %}<a class="btn btn-ghost" href="{{ url_for('applications.list_applications') }}">Clear</a>{% endif %}
+</form>
+{% if applications %}
+<div class="card table-wrap"><table>
+  <thead><tr><th>Job</th><th>Company</th><th>Applied</th><th>Status</th><th>Resume</th><th>Interview</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  {% for a in applications %}
+  <tr>
+    <td data-label="Job"><a href="{{ url_for('applications.detail', application_id=a.application_id) }}"><strong>{{ a.job.job_title if a.job else '—' }}</strong></a></td>
+    <td data-label="Company">{{ a.job.company.company_name if a.job and a.job.company else '—' }}</td>
+    <td data-label="Applied">{{ a.application_date }}</td>
+    <td data-label="Status">{{ badge(a.status) }}</td>
+    <td data-label="Resume">{{ a.resume_version or '—' }}</td>
+    <td data-label="Interview">{{ a.interview_data.date if a.interview_data and a.interview_data.date else '—' }}</td>
+    <td class="actions">
+      <a class="btn btn-sm" href="{{ url_for('applications.detail', application_id=a.application_id) }}">View</a>
+      <a class="btn btn-sm" href="{{ url_for('applications.edit', application_id=a.application_id) }}">Edit</a>
+      {{ delete_button(url_for('applications.delete', application_id=a.application_id), 'this application') }}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% elif status %}{{ empty('No applications with status "' ~ status ~ '".') }}
+{% else %}{{ empty('No applications yet. Track your first one!', url_for('applications.create'), '+ Add Application') }}{% endif %}
+{% endblock %}

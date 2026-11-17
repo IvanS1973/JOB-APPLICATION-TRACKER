@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% macro val(name, current) -%}{{ form.get(name, '') if form else (current if current is not none else '') }}{%- endmacro %}
+{% set editing = contact.contact_id is not none %}
+{% set sel_company = (form.get('company_id')|int(0)) if form else contact.company_id %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} Contact{% endblock %}
+{% block heading %}{{ 'Edit Contact' if editing else 'Add Contact' }}{% endblock %}
+{% block content %}
+{% if not companies %}
+<div class="card empty"><p>You need at least one company before adding a contact.</p><a class="btn btn-primary" href="{{ url_for('companies.create') }}">+ Add Company</a></div>
+{% else %}
+<form method="post" class="card form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field"><label for="contact_name">Name *</label>
+    <input id="contact_name" name="contact_name" maxlength="100" required value="{{ val('contact_name', contact.contact_name) }}"></div>
+  <div class="field"><label for="company_id">Company *</label>
+    <select id="company_id" name="company_id" required>
+      <option value="">Choose a company…</option>
+      {% for c in companies %}<option value="{{ c.company_id }}" {{ 'selected' if sel_company == c.company_id }}>{{ c.company_name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="title">Title</label>
+    <input id="title" name="title" maxlength="100" value="{{ val('title', contact.title) }}"></div>
+  <div class="field"><label for="email">Email</label>
+    <input id="email" name="email" type="email" maxlength="100" value="{{ val('email', contact.email) }}"></div>
+  <div class="field"><label for="phone">Phone</label>
+    <input id="phone" name="phone" maxlength="20" value="{{ val('phone', contact.phone) }}"></div>
+  <div class="field"><label for="linkedin_url">LinkedIn URL</label>
+    <input id="linkedin_url" name="linkedin_url" type="url" maxlength="200" value="{{ val('linkedin_url', contact.linkedin_url) }}"></div>
+  <div class="field full"><label for="notes">Notes</label>
+    <textarea id="notes" name="notes" rows="4">{{ val('notes', contact.notes) }}</textarea></div>
+  <div class="form-actions full">
+    <a class="btn btn-ghost" href="{{ url_for('contacts.detail', contact_id=contact.contact_id) if editing else url_for('contacts.list_contacts') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save Contact</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
